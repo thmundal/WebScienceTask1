@@ -1,0 +1,28 @@
+body {
+    font-family: Arial, Verdana, Tahoma;
+}
+
+.center-form {
+    width:400px;
+    margin:35vh auto;
+}
+
+.alert {
+    padding:10px;
+    margin:5px auto;
+    border:1px solid;
+    border-radius:5px;
+}
+
+.alert-warning {
+    border-color:#ff8d00;
+    background:#fbbe00;
+}
+
+.hidden {
+    display:none;
+}
+
+.visible {
+    display:auto;
+}
