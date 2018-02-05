@@ -1,0 +1,5 @@
+<table>
+    {foreach from=$list key=k item=v}
+        <tr><td>{$v->get("username")}</td><td><a href="chat?user={$v->get("id")}">Start chat</a></td></tr>
+    {/foreach}
+</table>

@@ -1,3 +1,5 @@
+<?php /* Smarty version 2.6.31, created on 2018-01-31 14:22:08
+         compiled from content/html/layout.html */ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,8 +14,9 @@
 </nav>
 
 <div class="main-content">
-    {$template_content}
+    <?php echo $this->_tpl_vars['template_content']; ?>
+
 </div>
 
 </body>
-</html>
+</html>

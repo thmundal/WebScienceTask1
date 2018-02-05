@@ -1,13 +1,16 @@
 <?php
 
 function template($file, Array $attrs = []) {
-    $content = file_get_contents($file);
+    /*$content = file_get_contents($file);
 
     foreach($attrs as $key => $val) {
         $content = str_replace("%".$key."%", $val, $content);
     }
 
-    return $content;
+    return $content;*/
+    global $smarty;
+    $smarty->assign($attrs);
+    return $smarty->fetch($file);
 }
 
 function pre_print_r($content) {
@@ -15,11 +18,15 @@ function pre_print_r($content) {
 }
 
 function get_route($root = "") {
-    $path = str_replace($root, "", $_SERVER["REQUEST_URI"]);
+    $fixed = str_replace($root, "", $_SERVER["REQUEST_URI"]);
+    //$path = substr($fixed, 0, strpos($fixed, "?"));
 
-    return $path;
+    return $fixed;
 }
 
-function redirect($url) {
-    header("location: " . $url);
+function redirect($url, $force = false) {
+    global $config;
+
+    if(get_route($config["root_url"]) != "/".$url OR $force)
+        header("location: " . $url);
 }

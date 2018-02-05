@@ -4,6 +4,5 @@ Class ExceptionHandler extends Exception {
         parent::__construct($message, $code, $previous);
         $this->line = $line;
         $this->file = $file;
-        //die($this->getMessage());
     }
 }
