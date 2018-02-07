@@ -1,5 +1,6 @@
 body {
     font-family: Arial, Verdana, Tahoma;
+    margin:0;
 }
 
 .center-form {
@@ -25,4 +26,10 @@ body {
 
 .visible {
     display:auto;
+}
+
+nav.main-menu {
+    display: block;
+    padding:5px;
+    border:1px solid #000;
 }

@@ -1,0 +1,7 @@
+<form action="{$form_action}" method="post">
+    <table>
+        <tr><td>Fornavn</td><td><input type="text" name="first_name"{if isset($profile)} value="{$profile->get("first_name")}"{/if} /></td></tr>
+        <tr><td>Etternavn</td><td><input type="text" name="last_name"{if isset($profile)} value="{$profile->get("last_name")}"{/if} /></td></tr>
+        <tr><td colspan="2"><input type="submit" value="Lagre" /></td></tr>
+    </table>
+</form>

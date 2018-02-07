@@ -1,0 +1,16 @@
+.chat-wrapper {
+    display:block;
+    border:1px solid #000;
+    height:300px;
+    box-sizing: border-box;
+    padding:10px;
+}
+
+.chat-content {
+    overflow:auto;
+    height:90%;
+}
+
+.chat-input {
+    width:100%;
+}

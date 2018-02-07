@@ -33,4 +33,18 @@ $(function() {
 
         return true;
     });
-})
+});
+
+
+function queryParams() {
+    var p = location.search.split("?")[1];
+    var d = {};
+    var split = p.split("&");
+
+    for(var i in split) {
+        var psplit = split[i].split("=");
+        d[psplit[0]] = psplit[1];
+    }
+
+    return d;
+}

@@ -52,4 +52,22 @@ Class User extends db_object {
         $user->set(["username" => $username, "password" => User::Encrypt($password)]);
         return $user->save();
     }
+
+    public function getProfile() {
+        $query = static::$connection->prepare("SELECT id FROM ".UserProfile::table()." WHERE user=?");
+        $query->bind_param("i", $this->attributes["id"]);
+        $query->execute();
+        $query->store_result();
+        $query->bind_result($id);
+        $query->fetch();
+
+        if(!is_null($id))
+            return UserProfile::Load($id);
+
+        return null;
+    }
+
+    public function getChatHandle($partner) {
+        return ChatHandle::getByParticipants($this->get("id"), $partner);
+    }
 }

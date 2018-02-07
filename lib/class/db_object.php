@@ -25,12 +25,17 @@ class db_object {
         $object->state = db_object_state::EXISTING_OBJECT;
 
         $query = static::$connection->prepare("SELECT * FROM " . static::$table . " WHERE id=? LIMIT 1");
-        $query->bind_param("i", $id);
-        $query->execute();
-        $result = $query->get_result();
 
-        foreach($result as $row) {
-            $object->set($row);
+        if($query) {
+            $query->bind_param("i", $id);
+            $query->execute();
+            $result = $query->get_result();
+
+            foreach($result as $row) {
+                $object->set($row);
+            }
+        } else {
+            throw new Exception(static::$connection->error);
         }
 
         return $object;
@@ -66,13 +71,13 @@ class db_object {
      * @param mixed $attr   Either the name of the attribute to set, or a key => value pair list of attributes
      * @param string $val   Only required when $attr is a string, and will represent the value for the attribute
      */
-    protected function set($attr, $val = "") {
+    public function set($attr, $val = "") {
         if(is_array($attr)) {
             foreach($attr as $key => $val) {
                 $this->attributes[$key] = $val;
             }
         } else {
-            $this->attrbutes[$attr] = $val;
+            $this->attributes[$attr] = $val;
         }
     }
 
@@ -102,21 +107,56 @@ class db_object {
         }
 
         if($this->state == db_object_state::NEW_OBJECT) {
+            // TODO: Potential SQL injection in parameter names part of following query
             $sql = "INSERT INTO ".static::$connection->real_escape_string(static::$table)."(".implode(",", array_keys($this->attributes)).") VALUES(".implode(",", array_fill(0, sizeof($this->attributes), "?")).")";
             $query = static::$connection->prepare($sql);
 
             if($query) {
                 $query->bind_param(implode("", array_fill(0, sizeof($this->attributes), "s")), ...array_values($this->attributes));
-                return $query->execute();
+                $query->execute();
+
+                if($query->error) {
+                    throw new Exception($query->error);
+                }
+
+                return $query;
             } else {
                 throw new Exception("Error preparing query: " . static::$connection->error . "\n" . '"'.implode("\",\"", array_values($this->attributes)).'"' . "\n" . $sql);
             }
         } else {
-            $query = static::$connection->prepare("UPDATE ? SET ?;");
+            $attrs = $this->attributes;
+            unset($attrs["id"]);
+            $vals = [];
+            foreach($attrs as $key => $val) {
+                $vals[] = static::$connection->real_escape_string($key)."= ? ";
+            }
 
+            $sql = "UPDATE ".static::$connection->real_escape_string(static::$table)." SET ".implode(",", $vals);
+            $query = static::$connection->prepare($sql);
+
+            if($query) {
+                $query->bind_param(implode("", array_fill(0, sizeof($attrs), "s")), ...array_values($attrs));
+                $query->execute();
+
+                if($query->error) {
+                    throw new Exception($query->error);
+                }
+
+                return $query;
+            } else {
+                throw new Exception("Error preparing query: " . static::$connection->error . "\n");
+            }
         }
 
         return false;
+    }
+
+    public static function table() {
+        return static::$table;
+    }
+
+    public function attributes() {
+        return $this->attributes;
     }
 }
 

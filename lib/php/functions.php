@@ -19,7 +19,12 @@ function pre_print_r($content) {
 
 function get_route($root = "") {
     $fixed = str_replace($root, "", $_SERVER["REQUEST_URI"]);
-    //$path = substr($fixed, 0, strpos($fixed, "?"));
+
+    $query = "";
+    if(strpos($fixed, "?") > -1) {
+        $query = substr($fixed, strpos($fixed, "?"), strlen($fixed));
+        $fixed = str_replace($query, "", $fixed);
+    }
 
     return $fixed;
 }
@@ -29,4 +34,8 @@ function redirect($url, $force = false) {
 
     if(get_route($config["root_url"]) != "/".$url OR $force)
         header("location: " . $url);
+}
+
+function json($o) {
+    return json_encode($o);
 }

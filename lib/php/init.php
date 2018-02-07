@@ -9,6 +9,8 @@ require_once("lib/php/config.php");
 require_once("lib/smarty/smarty-2.6.31/libs/Smarty.class.php");
 require_once("lib/class/db_object.php");
 require_once("lib/class/user.php");
+require_once("lib/class/user_profile.php");
+require_once("lib/class/chat_handle.php");
 require_once("lib/php/functions.php");
 
 $database = new mysqli(
