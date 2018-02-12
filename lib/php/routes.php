@@ -59,7 +59,13 @@ switch(get_route($config["root_url"])) {
 
             redirect("profile");
         } else {
-            $template_content = template("content/html/create_profile.html", ["form_action" => "edit-profile", "profile" => $user->getProfile()]);
+            $profile = $user->getProfile();
+
+            if($profile) {
+                $template_content = template("content/html/create_profile.html", ["form_action" => "edit-profile", "profile" => $profile]);
+            } else {
+                redirect("create-profile");
+            }
         }
     break;
 }
