@@ -118,20 +118,21 @@ class db_object {
                 if($query->error) {
                     throw new Exception($query->error);
                 }
-
+                $this->set("id", static::$connection->insert_id);
                 return $query;
             } else {
                 throw new Exception("Error preparing query: " . static::$connection->error . "\n" . '"'.implode("\",\"", array_values($this->attributes)).'"' . "\n" . $sql);
             }
         } else {
             $attrs = $this->attributes;
+            $id = $this->get("id");
             unset($attrs["id"]);
             $vals = [];
             foreach($attrs as $key => $val) {
                 $vals[] = static::$connection->real_escape_string($key)."= ? ";
             }
 
-            $sql = "UPDATE ".static::$connection->real_escape_string(static::$table)." SET ".implode(",", $vals);
+            $sql = "UPDATE ".static::$connection->real_escape_string(static::$table)." SET ".implode(",", $vals)." WHERE id=".$id;
             $query = static::$connection->prepare($sql);
 
             if($query) {
