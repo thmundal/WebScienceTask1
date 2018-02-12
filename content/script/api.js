@@ -13,7 +13,7 @@ Api = {
 
     handle: function(cb, response) {
         if(response.console != "") {
-            console.log(JSON.parse(response.console));
+            console.log(response.console);
         }
 
         if(response.error) {
