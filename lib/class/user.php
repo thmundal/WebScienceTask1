@@ -70,4 +70,25 @@ Class User extends db_object {
     public function getChatHandle($partner) {
         return ChatHandle::getByParticipants($this->get("id"), $partner);
     }
+
+    public function verifyChatHandle($id) {
+        $handle = ChatHandle::Load($id);
+
+        if($handle) {
+            if($handle->get("a") == $this->get("id") OR $handle->get("b") == $this->get("id")) {
+                return $handle;
+            }
+        }
+
+        return false;
+    }
+
+    public function createChatHandle($partner) {
+        $handle = new ChatHandle();
+        $handle->set(["a" => $this->get("id"), "b" => $partner]);
+        $handle->save();
+
+        $thathandle = $this->getChatHandle($partner);
+        return $thathandle;
+    }
 }

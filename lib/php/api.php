@@ -14,12 +14,40 @@ try {
 
         case "/chat-session":
             $chathandle = $user->getChatHandle($_POST["partner"]);
-            $response->console($chathandle);
+
+            if($chathandle) {
+                $response->respond($chathandle->attributes());
+            } else {
+                $chathandle = $user->createChatHandle($_POST["partner"]);
+                $response->respond($chathandle->attributes());
+                $response->console("Could not find chat handle, created one");
+            }
+        break;
+
+        case "/chat-handle-poll":
+            $chathandle = $user->verifyChatHandle($_POST["id"]);
+
+            if($chathandle) {
+                $response->respond($chathandle->sendMessages());
+            } else {
+                $response->console("not a valid user chathandle");
+            }
+        break;
+
+        case "/chat-handle-receive":
+            $chathandle = $user->verifyChatHandle($_POST["handle"]["id"]);
+
+            if($chathandle) {
+                // The following variable does not hold a message object?
+                $msg = $chathandle->receiveMessage($_POST["message"], $user->get("id"));
+                $response->console("Saved message");
+                $response->respond(["handle" => $chathandle->attributes(), "message" => $msg->attributes()]);
+            }
         break;
     }
 } catch(Exception $e) {
     ob_end_clean();
-    $response->error([$e->getMessage(), $e->getFile(), $e->getLine()]);
+    $response->error([$e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace()]);
 }
 
 $response->flush();
