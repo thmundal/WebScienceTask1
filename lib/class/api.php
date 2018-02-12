@@ -35,7 +35,7 @@ class Api {
             $data = $data->attributes();
         }
 
-        $this->set(["console" => json_encode($data)]);
+        $this->set(["console" => $data]);
     }
 
     public function error($data) {
