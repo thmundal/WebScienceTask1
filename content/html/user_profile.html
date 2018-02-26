@@ -1,1 +1,11 @@
-{$profile->get("first_name")} {$profile->get("last_name")}
+<div>
+    <img src="{$profile->image()}" class="profile-page-picture" />
+</div>
+
+<h2 class="profile-title">
+    {$profile->get("first_name")} {$profile->get("last_name")}
+</h2>
+
+<div>
+    {$profile->get("about")}
+</div>

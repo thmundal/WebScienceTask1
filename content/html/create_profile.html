@@ -1,7 +1,29 @@
-<form action="{$form_action}" method="post">
+<div class="alert alert-warning hidden">
+
+</div>
+
+<form action="{$form_action}" method="post" class="profile-form js-profile-form validate" enctype="multipart/form-data">
     <table>
-        <tr><td>Fornavn</td><td><input type="text" name="first_name"{if isset($profile)} value="{$profile->get("first_name")}"{/if} /></td></tr>
-        <tr><td>Etternavn</td><td><input type="text" name="last_name"{if isset($profile)} value="{$profile->get("last_name")}"{/if} /></td></tr>
-        <tr><td colspan="2"><input type="submit" value="Lagre" /></td></tr>
+        <tr>
+            <td>Fornavn</td>
+            <td><input type="text" name="first_name"{if isset($profile)} data-required="yes" value="{$profile->get("first_name")}"{/if} /></td>
+        </tr>
+        <tr>
+            <td>Etternavn</td>
+            <td><input type="text" name="last_name"{if isset($profile)} data-required="yes" value="{$profile->get("last_name")}"{/if} /></td>
+        </tr>
+        <tr>
+            <td>Profilbilde</td>
+            <td><input type="file" name="profile_image" class="js-file-upload" /></td>
+        </tr>
+        <tr>
+            <td valign="top">Litt om deg selv</td>
+            <td>
+                <textarea name="about">{if isset($profile)}{$profile->get("about")}{/if}</textarea>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2"><input type="submit" value="Lagre" /></td></tr>
     </table>
 </form>
+<img class="js-profile-image-preview" />

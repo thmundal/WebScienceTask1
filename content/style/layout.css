@@ -1,6 +1,18 @@
 body {
-    font-family: Arial, Verdana, Tahoma;
+    font-family: 'Montserrat', sans-serif;
+    font-size:18px;
     margin:0;
+    background:#373E4F;
+    color:#FFF;
+}
+
+a {
+    color:#DDD;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
 }
 
 .center-form {
@@ -18,6 +30,8 @@ body {
 .alert-warning {
     border-color:#ff8d00;
     background:#fbbe00;
+    color:#555;
+    font-weight:bold;
 }
 
 .hidden {
@@ -31,5 +45,91 @@ body {
 nav.main-menu {
     display: block;
     padding:5px;
-    border:1px solid #000;
+    margin-top:60px;
+    margin-bottom:50px;
+    border-bottom:1px solid #EEE;
+    padding-bottom:25px;
 }
+
+nav.main-menu a {
+    margin:0 30px;
+}
+
+.full-width {
+    width:1024px;
+    margin:0 auto;
+}
+
+input, textarea {
+    font-size:16px;
+    padding:4px 8px;
+    border-radius:3px;
+    border:1px solid #EEE;
+    background:#CCC;
+}
+
+textarea {
+    min-width:450px;
+    min-height:120px;
+}
+
+input[type=file] {
+    background:transparent;
+    border:none;
+}
+
+h2.profile-title {
+    text-align:center;
+    /* border-bottom:2px solid #EEE; */
+    width:80%;
+    margin:50px auto;
+    padding-bottom:25px;
+}
+
+h3 {
+    border-bottom:2px solid #EEE;
+    padding-bottom:15px;
+}
+
+.magnifying-glass:before {
+    font-size:28px;
+    position:absolute;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    transform: rotate(45deg);
+    content:"\26B2";
+    border-radius:100%;
+    height:36px;
+    width:36px;
+    text-align:center;
+    line-height:36px;
+    box-sizing: border-box;
+    margin-top:-4px;
+}
+
+.magnifying-glass:hover:before {
+    background:#888;
+}
+
+.profile-page-picture {
+    width:250px;
+    height:250px;
+    margin:0 auto;
+    display: block;
+}
+
+.profile-form {
+    float:left;
+}
+
+.js-profile-image-preview {
+    float:left;
+    max-width:250px;
+    max-height:250px;
+}
+
+/*
+    https://stackoverflow.com/questions/2717127/css3-gradient-borders
+    -webkit-border-image: -webkit-gradient(linear, left top, left bottom, from(#00abeb), to(#fff), color-stop(0.5, #fff), color-stop(0.5, #66cc00)) 21 30 30 21 repeat repeat;
+ */
