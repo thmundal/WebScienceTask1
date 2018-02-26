@@ -8,8 +8,18 @@ if(strpos(get_route($config["root_url"]), "/api") > -1) {
 
 switch(get_route($config["root_url"])) {
     case "/":
-    default:
         $template_content = template("content/html/user_index.html", ["username" => $user->get("username")]);
+    break;
+
+    default:
+        $url = get_route($config["root_url"]);
+
+        if($profile = UserProfile::FindByUrl($url)) {
+            $template_content = template("content/html/user_profile.html", ["profile" => $profile]);
+        } else {
+            $template_content = "User not found: " . $url;
+        }
+
     break;
 
     case "/logout":
@@ -55,9 +65,21 @@ switch(get_route($config["root_url"])) {
         if($_POST) {
             $profile = $user->getProfile();
             $profile->set($_POST);
-            $profile->save();
 
-            redirect("profile");
+            $profile_image = $_FILES["profile_image"];
+
+            if(!empty($profile_image["name"])) {
+                $profile->saveProfileImage($profile_image);
+            }
+
+
+            if(!$profile->error) {
+                $profile->save();
+                redirect("profile");
+            } else {
+                echo $profile->error;
+            }
+
         } else {
             $profile = $user->getProfile();
 
