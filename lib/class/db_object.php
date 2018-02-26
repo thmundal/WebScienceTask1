@@ -88,7 +88,7 @@ class db_object {
      */
     public function get($attr) {
         if(array_key_exists($attr, $this->attributes)) {
-            return $this->attributes[$attr];
+            return htmlspecialchars($this->attributes[$attr]);
         }
 
         return null;
