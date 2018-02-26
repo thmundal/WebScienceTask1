@@ -1,0 +1,17 @@
+{
+  "name": "websocket_handler",
+  "version": "1.0.0",
+  "description": "A node.js package to handle websocket communication",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Thomas Mundal <thomas@munso.no>",
+  "license": "ISC",
+  "dependencies": {
+    "interactive": "^0.1.9",
+    "memcached": "^2.2.2",
+    "mysql": "^2.15.0",
+    "socket.io": "^2.0.3"
+  }
+}

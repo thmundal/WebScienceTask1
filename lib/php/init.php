@@ -13,6 +13,9 @@ require_once("lib/class/user_profile.php");
 require_once("lib/class/chat_handle.php");
 require_once("lib/php/functions.php");
 
+$memcached = new Memcached;
+$memcached->addServer("localhost", 11211);
+
 $database = new mysqli(
         $config["mysql"]["host"],
         $config["mysql"]["username"],
@@ -26,7 +29,11 @@ $smarty = new Smarty();
 $smarty->template_dir = "/var/www/usn/websciencetask1/";
 
 $user = null;
+$user_id = null;
 
 if(User::LoggedIn()) {
     $user = User::Load($_SESSION["login"]);
+    $user_id = $user->get("id");
 }
+
+$smarty->assign("user_id", $user_id);

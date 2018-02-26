@@ -6,25 +6,54 @@ function auto_scroll() {
     }
 }
 $(function() {
-    Api.post("chat-session", {partner: queryParams()["user"]}, function(response) {
-        if(response.body == null) {
-            return;
+    var user_id = $("meta[name=user]").attr("value");
+
+    if(typeof io != "undefined") {
+        //Api.post("chat-session", {partner: queryParams()["user"]}, function(response) {
+        var socket = io("munso.no:3000");
+
+        if(typeof queryParams()["user"] !== "undefined") {
+            socket.emit("request-session", {session: getCookie("PHPSESSID"), partner: queryParams()["user"], user_id: user_id});
         }
 
+        socket.on("receive-session", function(data) {
+            console.log(data);
+        });
+    } else {
+        $(".js-chat-content").append($("<div>").html("Node.js server is not running. Contact admin"));
+        console.error("Node.js server is not running. Contact admin");
+    }
 
-        handle = new ChatHandle(response.body);
+//    Api.post("chat-session", {partner: queryParams()["user"]}, function(response) {
+    socket.on("receive-session", function(response) {
+        console.log(response, "session received");
 
-        var poll_interval = 500;
-        chat_poller = setInterval(function() {
-            handle.pollMessage(function(response) {
-                for(var i in response.body) {
-                    handle.addMessage(new ChatMessage(response.body[i]));
-                }
+        handle = new ChatHandle(response.handle);
 
-                handle.flushMessages(".js-chat-content");
-            })}, poll_interval);
+        for(var i in response.messages) {
+            handle.addMessage(new ChatMessage(response.messages[i]));
+        }
+        handle.flushMessages(".js-chat-content");
 
-        var scroll_interval = 1000;
+        socket.on("receive-message", function(data) {
+            console.log("message received", data);
+            // This method is probably not needed anymore
+            handle.addMessage(new ChatMessage(data));
+            handle.flushMessages(".js-chat-content");
+        });
+
+        // var poll_interval = 500;
+        // chat_poller = setInterval(function() {
+        //     handle.pollMessage(function(response) {
+        //         for(var i in response.body) {
+        //             handle.addMessage(new ChatMessage(response.body[i]));
+        //         }
+        //
+        //         handle.flushMessages(".js-chat-content");
+        //     })}, poll_interval);
+        //
+        // clearInterval(chat_poller);
+        //var scroll_interval = 1000;
         //auto_scroller = setInterval(auto_scroll, scroll_interval);
 
         $(".js-chat-content").on("scroll", function() {
@@ -39,12 +68,22 @@ $(function() {
 
         $(".js-chat-input").on("keypress", function(event) {
             if(event.key == "Enter") {
-                var input = $(this)
-                handle.sendMessage($(this).val(), function(response) {
-                    handle.addMessage(new ChatMessage(response.body.message));
-                    autoscroll_pause = false;
-                    input.val("");
+                var input = $(this);
+                var message = new ChatMessage({
+                    message: input.val(),
+                    sender: user_id,
+                    viewed: 0,
+                    chat_handle: handle.attributes.id
                 });
+
+                socket.emit("send-message", { handle: handle.attributes, message: message.attributes });
+                //handle.addMessage(message);
+                //handle.flushMessages(".js-chat-content");
+                autoscroll_pause = false;
+                input.val("");
+
+                //handle.sendMessage($(this).val(), function(response) {
+                //});
             }
         });
     });

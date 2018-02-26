@@ -7,6 +7,8 @@ Class User extends db_object {
     }
 
     public static function Login($username, $password) {
+        global $memcached;
+
         $query = static::$connection->prepare("SELECT id,password FROM ".static::$connection->real_escape_string(static::$table)." WHERE username = ?");
         $query->bind_param("s", $username);
         $query->execute();
@@ -17,6 +19,16 @@ Class User extends db_object {
 
         if(password_verify($password, $pw)) {
             $_SESSION["login"] = $id;
+            $cached_users = $memcached->get("usn:php:user");
+
+            if(empty($cached_users)) {
+                $cached_users = json_encode([session_id() => $id]);
+            } else {
+                $cached_users = json_decode($cached_users);
+                $cached_users->{session_id()} = $id;
+                $cached_users = json_encode($cached_users);
+            }
+            $memcached->set("usn:php:user", $cached_users);
             return true;
         }
 

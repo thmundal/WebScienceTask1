@@ -1,24 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     <link rel="stylesheet" href="content/style/layout.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="http://munso.no:3000/socket.io/socket.io.js"></script>
     <script src="content/script/default.js"></script>
     <script src="content/script/api.js"></script>
+    <meta name="user" value="{$user_id}" />
 </head>
 <body>
 
 {if $user !== null}
-<nav class="main-menu">
+<nav class="main-menu full-width">
     <a href="/websciencetask1">Hjem</a>
     <a href="profile">Profil</a>
     <a href="edit-profile">Rediger profil</a>
     <a href="users">Brukerliste</a>
     <a href="logout">Logg ut</a>
+    <input type="text" class="js-user-search" />
+    <span class="magnifying-glass"></span>
 </nav>
 {/if}
 
-<div class="main-content">
+<div class="main-content full-width">
     {$template_content}
 </div>
 
