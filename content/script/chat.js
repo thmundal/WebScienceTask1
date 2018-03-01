@@ -37,9 +37,11 @@ $(function() {
 
         socket.on("receive-message", function(data) {
             console.log("message received", data);
-            // This method is probably not needed anymore
-            handle.addMessage(new ChatMessage(data));
-            handle.flushMessages(".js-chat-content");
+            if(data.sender == queryParams()["user"]) {
+                // This method is probably not needed anymore
+                handle.addMessage(new ChatMessage(data));
+                handle.flushMessages(".js-chat-content");
+            }
         });
 
         // var poll_interval = 500;
@@ -124,7 +126,7 @@ ChatHandle.prototype.addMessage = function(message) {
 ChatHandle.prototype.flushMessages = function(container) {
     for(var i in this.messages) {
         if(!this.messages[i].displayed) {
-            $(container).append($("<div>").html(this.messages[i].attributes.sender+": "+this.messages[i].attributes.message));
+            $(container).append($("<div>").html(this.messages[i].attributes.sender_name+": "+this.messages[i].attributes.message));
             this.messages[i].displayed = true;
             auto_scroll();
         }

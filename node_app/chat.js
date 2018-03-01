@@ -10,7 +10,7 @@ class Handle {
 
     getMessages(cb) {
         connection.query({
-            sql: "SELECT chat_messages.id, chat_messages.chat_handle, chat_messages.message, chat_messages.viewed, profiles.first_name as sender FROM chat_messages, profiles WHERE chat_messages.chat_handle=? AND profiles.user=chat_messages.sender;",
+            sql: "SELECT chat_messages.id, chat_messages.chat_handle, chat_messages.message, chat_messages.viewed, profiles.id as sender, profiles.first_name as sender_name FROM chat_messages, profiles WHERE chat_messages.chat_handle=? AND profiles.user=chat_messages.sender;",
             values: [ this.attributes.id ]
         }, (err, result, fields) => {
             cb.call(this, result);

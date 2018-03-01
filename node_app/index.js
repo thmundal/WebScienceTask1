@@ -20,6 +20,11 @@ connection = mysql.createConnection({
 Chat = require("./chat");
 
 connection.connect(function(err) {
+    // Keep connection alive (HACK)
+    setInterval(function () {
+        connection.query('SELECT 1');
+    }, 5000);
+
     if(err) throw err;
 
     Chat.static.findHandle(1, 2, function() {
@@ -46,7 +51,7 @@ connection.connect(function(err) {
                 if(!session) {
                     Chat.static.createSession(data.user_id, socket);
                 }
-                
+
                 session.socket = socket;
 
                 console.log("session request received, data:", data);
@@ -67,7 +72,7 @@ connection.connect(function(err) {
                         var message = new Chat.message(data.message);
                         this.addMessage(message, () => {
                             Chat.static.getUserName(message.attributes.sender, function() {
-                                message.attributes.sender = this;
+                                message.attributes.sender_name = this;
                                 socket.emit("receive-message", message.attributes);
 
                                 partner = Chat.static.getUserSocket(handle_data.partner);
