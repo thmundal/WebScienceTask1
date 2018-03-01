@@ -37,7 +37,7 @@ $(function() {
 
         socket.on("receive-message", function(data) {
             console.log("message received", data);
-            if(data.sender == queryParams()["user"]) {
+            if(data.sender == queryParams()["user"] || data.sender == user_id) {
                 // This method is probably not needed anymore
                 handle.addMessage(new ChatMessage(data));
                 handle.flushMessages(".js-chat-content");
