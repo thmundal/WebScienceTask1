@@ -1,3 +1,4 @@
 templates_c/
 *~
 content/upload/
+node_app/node_modules/interactive/history.json
