@@ -89,7 +89,12 @@ $(function() {
             }
         });
     });
+
+    socket.on("disconnect", function() {
+        $(".js-chat-content").append($("<div>").html("Connection to server lost."));
+    });
 });
+
 
 function ChatHandle(data) {
     this.attributes = data;

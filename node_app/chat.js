@@ -10,7 +10,8 @@ class Handle {
 
     getMessages(cb) {
         connection.query({
-            sql: "SELECT chat_messages.id, chat_messages.chat_handle, chat_messages.message, chat_messages.viewed, profiles.id as sender, profiles.first_name as sender_name FROM chat_messages, profiles WHERE chat_messages.chat_handle=? AND profiles.user=chat_messages.sender;",
+            //sql: "SELECT chat_messages.id, chat_messages.chat_handle, chat_messages.message, chat_messages.viewed, profiles.id as sender, profiles.first_name as sender_name FROM chat_messages, profiles WHERE chat_messages.chat_handle=? AND profiles.user=chat_messages.sender;",
+            sql: "SELECT chat.*, CONCAT(profile.first_name, ' ', profile.last_name) as sender_name FROM chat_messages as chat INNER JOIN profiles as profile ON chat.sender = profile.id WHERE chat.chat_handle = ? AND profile.user=chat.sender",
             values: [ this.attributes.id ]
         }, (err, result, fields) => {
             cb.call(this, result);
@@ -145,11 +146,11 @@ var Static = {
 
     getUserName: function(user_id, cb) {
         connection.query({
-            sql:"SELECT first_name FROM profiles WHERE user=?;",
+            sql:"SELECT CONCAT(first_name, ' ', last_name) as name FROM profiles WHERE user=?;",
             values:[user_id]
         }, (err, result, fields) => {
             if(result.length > 0) {
-                cb.call(result[0].first_name);
+                cb.call(result[0].name);
             }
         })
     }
