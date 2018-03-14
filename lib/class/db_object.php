@@ -152,10 +152,18 @@ class db_object {
         return false;
     }
 
+    /**
+     * Return table name of this object
+     * @return string Table name
+     */
     public static function table() {
         return static::$table;
     }
 
+    /**
+     * Return the attributes array for this object
+     * @return array
+     */
     public function attributes() {
         return $this->attributes;
     }

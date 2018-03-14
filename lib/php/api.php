@@ -1,4 +1,8 @@
 <?php
+/**
+ * Deprecated functionality after implementing Node.js chat handling
+ * These backends may not provide data as expected
+ */
 require_once("lib/class/api.php");
 header("content-type: application/json; charset=utf-8");
 $response = Api::Init();
