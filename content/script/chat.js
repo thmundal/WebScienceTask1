@@ -1,4 +1,5 @@
 var autoscroll_pause = false;
+var chat;
 
 function auto_scroll() {
     if(!autoscroll_pause) {
@@ -9,90 +10,32 @@ $(function() {
     var user_id = $("meta[name=user]").attr("value");
 
     if(typeof io != "undefined") {
-        //Api.post("chat-session", {partner: queryParams()["user"]}, function(response) {
-        var socket = io("munso.no:3000");
+        chat = Chat.Init(user_id);
+        chat.on("connect", function(data) {
+            this.on("handles-received", (data) => {
+                $("#chatBarWrapper").css("visibility", "visible");
+                for(var i in data) {
+                    var partner = (data[i].a==user_id?data[i].b:data[i].a);
+                    var handle = new ChatHandle(data[i], this.connection, partner, user_id);
+                    chat.addHandle(handle);
+                }
 
-        if(typeof queryParams()["user"] !== "undefined") {
-            socket.emit("request-session", {session: getCookie("PHPSESSID"), partner: queryParams()["user"], user_id: user_id});
-        }
+                $(".js-chat-view-container").each(function() {
+                    var h = $(this).data("handle");
+                    var handle = chat.getHandleByID(h);
 
-        socket.on("receive-session", function(data) {
-            console.log(data);
+                    if(handle.view === null) {
+                        $(this).append(handle.createView());
+                    }
+                })
+            });
+
+            this.getChatHandles();
         });
-    } else {
-        $(".js-chat-content").append($("<div>").html("Node.js server is not running. Contact admin"));
-        console.error("Node.js server is not running. Contact admin");
+
+        chat.connect("munso.no:3000");
+
     }
-
-//    Api.post("chat-session", {partner: queryParams()["user"]}, function(response) {
-    socket.on("receive-session", function(response) {
-        console.log(response, "session received");
-
-        handle = new ChatHandle(response.handle);
-
-        for(var i in response.messages) {
-            handle.addMessage(new ChatMessage(response.messages[i]));
-        }
-        handle.flushMessages(".js-chat-content");
-
-        socket.on("receive-message", function(data) {
-            console.log("message received", data);
-            if(data.sender == queryParams()["user"] || data.sender == user_id) {
-                // This method is probably not needed anymore
-                handle.addMessage(new ChatMessage(data));
-                handle.flushMessages(".js-chat-content");
-            }
-        });
-
-        // var poll_interval = 500;
-        // chat_poller = setInterval(function() {
-        //     handle.pollMessage(function(response) {
-        //         for(var i in response.body) {
-        //             handle.addMessage(new ChatMessage(response.body[i]));
-        //         }
-        //
-        //         handle.flushMessages(".js-chat-content");
-        //     })}, poll_interval);
-        //
-        // clearInterval(chat_poller);
-        //var scroll_interval = 1000;
-        //auto_scroller = setInterval(auto_scroll, scroll_interval);
-
-        $(".js-chat-content").on("scroll", function() {
-            var scroll_delta = $(".js-chat-content").prop("scrollHeight") - ($(".js-chat-content").height() + $(".js-chat-content").scrollTop());
-            var scroll_limit = 15;  // Find this from line-height property?
-            autoscroll_pause = false;
-
-            if(scroll_delta > scroll_limit) {
-                autoscroll_pause = true;
-            }
-        });
-
-        $(".js-chat-input").on("keypress", function(event) {
-            if(event.key == "Enter") {
-                var input = $(this);
-                var message = new ChatMessage({
-                    message: input.val(),
-                    sender: user_id,
-                    viewed: 0,
-                    chat_handle: handle.attributes.id
-                });
-
-                socket.emit("send-message", { handle: handle.attributes, message: message.attributes });
-                //handle.addMessage(message);
-                //handle.flushMessages(".js-chat-content");
-                autoscroll_pause = false;
-                input.val("");
-
-                //handle.sendMessage($(this).val(), function(response) {
-                //});
-            }
-        });
-    });
-
-    socket.on("disconnect", function() {
-        $(".js-chat-content").append($("<div>").html("Connection to server lost."));
-    });
 });
 
 

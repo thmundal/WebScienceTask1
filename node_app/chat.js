@@ -10,8 +10,7 @@ class Handle {
 
     getMessages(cb) {
         connection.query({
-            //sql: "SELECT chat_messages.id, chat_messages.chat_handle, chat_messages.message, chat_messages.viewed, profiles.id as sender, profiles.first_name as sender_name FROM chat_messages, profiles WHERE chat_messages.chat_handle=? AND profiles.user=chat_messages.sender;",
-            sql: "SELECT chat.*, CONCAT(profile.first_name, ' ', profile.last_name) as sender_name FROM chat_messages as chat INNER JOIN profiles as profile ON chat.sender = profile.id WHERE chat.chat_handle = ? AND profile.user=chat.sender",
+            sql: "SELECT chat.*, CONCAT(profile.first_name, ' ', profile.last_name) as sender_name FROM chat_messages as chat JOIN profiles as profile ON chat.sender = profile.user WHERE chat.chat_handle = ?",
             values: [ this.attributes.id ]
         }, (err, result, fields) => {
             cb.call(this, result);
@@ -27,16 +26,20 @@ class ChatMessage {
     save(cb) {
         connection.query({
             sql: "INSERT INTO chat_messages SET chat_handle=?, sender=?, message=?, viewed=0;",
-            values: [this.attributes.chat_handle, this.attributes.sender, this.attributes.message, this.attributes.viewed]
+            values: [this.attributes.chat_handle, this.attributes.sender, this.attributes.message, this.attributes.viewed, this.attributes.sender]
         }, (err, result, fields) => {
             if(err) {
                 console.log(err);
             }
 
             this.attributes.id = result.insertId;
-            if(typeof cb == "function") {
-                cb.call(this);
-            }
+            Static.getUserName(this.attributes.sender, (name) => {
+                this.attributes.sender_name = name;
+
+                if(typeof cb == "function") {
+                    cb.call(this);
+                }
+            })
         });
 
         return this;
@@ -49,6 +52,7 @@ var Static = {
     findHandle: function(a, b, cb) {
         connection.query({
             sql: "SELECT id FROM chat_handles WHERE (a=? AND b=?) XOR (a=? AND b=?) LIMIT 1;",
+            // sql:"SELECT handle.*, message.id as msg_id, message.message FROM chat_handles as handle INNER JOIN chat_messages as message WHERE message.chat_handle = handle.id AND handle.a=? OR handle.b=?;",
             values: [b,a,a,b]
         }, (error, result, fields) => {
             if(result.length > 0) {
@@ -62,6 +66,15 @@ var Static = {
                 });
             }
         });
+    },
+
+    getAllUserHandles: function(user_id, cb) {
+        connection.query({
+            sql:"SELECT * FROM chat_handles WHERE a=? OR b=?;",
+            values:[user_id, user_id]
+        }, (error, result, fields) => {
+            cb.call(null, result);
+        })
     },
 
     validateUser: function(session) {
@@ -92,26 +105,7 @@ var Static = {
         });
     },
 
-    // getPartnerSocket: function(session, handle) {
-    //     var partner = -1;
-    //     var user_id = user_data[session];
-    //     if(handle.attributes.a == user_id) {
-    //         partner = handle.attributes.b;
-    //     } else {
-    //         partner = handle.attributes.a;
-    //     }
-    //
-    //     for(var i in user_data) {
-    //         if(user_data[i] == partner && typeof sessions[i] !== "undefined") {
-    //             return sessions[i].socket;
-    //         }
-    //     }
-    //
-    //     return false;
-    // },
-
     getUserSocket: function(user_id) {
-        console.log("Searching user socket for user ", user_id);
         for(var i in sessions) {
             if(i == user_id) {
                 return sessions[i].socket;
@@ -123,7 +117,6 @@ var Static = {
 
     getSession: function(user_id) {
         if(sessions.hasOwnProperty(user_id)) {
-            console.log("session found for ", user_id);
             return sessions[user_id];
         }
 
@@ -135,8 +128,10 @@ var Static = {
     },
 
     createSession: function(user_id, socket) {
-        console.log("Creating session with id ", user_id);
-        sessions[user_id] = { socket: socket };
+        sessions[user_id] = {
+            socket: socket,
+            user_id: user_id
+        };
         return sessions[user_id];
     },
 
@@ -150,7 +145,7 @@ var Static = {
             values:[user_id]
         }, (err, result, fields) => {
             if(result.length > 0) {
-                cb.call(result[0].name);
+                cb.call(result[0].name, result[0].name);
             }
         })
     }

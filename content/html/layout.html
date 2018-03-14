@@ -3,10 +3,14 @@
 <head>
     <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     <link rel="stylesheet" href="content/style/layout.css" />
+    <link rel="stylesheet" href="content/style/chat.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="http://munso.no:3000/socket.io/socket.io.js"></script>
     <script src="content/script/default.js"></script>
     <script src="content/script/api.js"></script>
+    <script src="content/script/chat.js"></script>
+    <script src="content/script/class/chat.js"></script>
+
     <meta name="user" value="{$user_id}" />
 </head>
 <body>
@@ -27,5 +31,7 @@
     {$template_content}
 </div>
 
+
+<div id="chatBarWrapper"></div>
 </body>
 </html>

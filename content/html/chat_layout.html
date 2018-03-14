@@ -1,14 +1,11 @@
-<script src="content/script/chat.js"></script>
 <link rel="stylesheet" href="content/style/chat.css" />
+
+<meta name="chat_handle" value="{$chat_handle}" />
+
 
 <p>
     Chatting with {$partner_profile->get("first_name")}
 </p>
 
-<div class="js-chat-wrapper chat-wrapper">
-    <div class="js-chat-content chat-content">
-    </div>
-    <div class="js-chat-input-wrapper chat-input-wrapper">
-        <input type="text" class="js-chat-input chat-input" />
-    </div>
+<div class="js-chat-wrapper chat-wrapper js-chat-view-container" data-handle="{$chat_handle}">
 </div>

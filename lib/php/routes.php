@@ -30,14 +30,22 @@ switch(get_route($config["root_url"])) {
 
     case "/users":
         $users_list = User::GetList();
+
+        foreach($users_list as $key => $val) {
+            if($val->get("id") == $user->get("id")) {
+                unset($users_list[$key]);
+            }
+        }
+        
         $template_content = template("content/html/user_list.html", ["list" => $users_list]);
     break;
 
     case "/chat":
         $partner = User::Load($_GET["user"]);
         $partner_profile = $partner->getProfile();
+        $chat_handle = ChatHandle::getByParticipants($user->get("id"), $partner->get("id"));
 
-        $template_content = template("content/html/chat_layout.html", ["partner_profile" => $partner_profile]);
+        $template_content = template("content/html/chat_layout.html", ["partner_profile" => $partner_profile, "chat_handle" => $chat_handle->get("id")]);
     break;
 
     case "/profile":

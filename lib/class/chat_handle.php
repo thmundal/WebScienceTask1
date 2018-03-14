@@ -4,39 +4,16 @@ class ChatHandle extends db_object {
     protected static $table = "chat_handles";
 
     public static function getByParticipants($a, $b) {
-        //$sql = "SELECT id FROM ".static::$connection->real_escape_string(static::$table)." WHERE a IN (?) AND b IN (?)";
-        //$query = static::$connection->prepare($sql);
-        $condition = static::$connection->real_escape_string($a).",".static::$connection->real_escape_string($b);
-
-        /*$query->bind_param("ss", $condition, $condition);
+        $query = static::$connection->prepare("SELECT id FROM chat_handles WHERE (a=? AND b=?) XOR (a=? AND b=?) LIMIT 1");
+        $query->bind_param("dddd", $b, $a, $a, $b);
 
         $query->execute();
-        //$query->store_result();
         $query->bind_result($id);
-        //$query->fetch();
-        //pre_print_r($query);
-        //return;
+        $query->fetch();
+        $query->close();
 
-        if($query->error) {
-            throw new Exception($query->error);
-        }
+        return ChatHandle::load($id);
 
-
-        while($query->fetch()) {
-            pre_print_r($id);
-            if($id != null) {
-                return ChatHandle::Load($id);
-            }
-        }
-
-        $query->close();*/
-
-        $b = static::$connection->query("SELECT * FROM ".static::$table." WHERE a IN (".$condition.") AND b IN (".$condition.") LIMIT 1;");
-
-        if($b->num_rows > 0) {
-            $row = $b->fetch_array();
-            return ChatHandle::Load($row["id"]);
-        }
 
         return false;
     }
@@ -63,7 +40,6 @@ class ChatHandle extends db_object {
         $msg = new ChatMessage();
         $msg->set(["chat_handle" => $this->get("id"), "message" => htmlspecialchars($message), "sender" => $sender]);
         $msg->save();
-        $msg->set("sender", $msg->sender());
         return $msg;
     }
 }
@@ -75,8 +51,7 @@ class ChatMessage extends db_object {
         if($this->get("sender") != 0) {
             $sender = User::Load($this->get("sender"));
             $profile = $sender->getProfile();
-            if($profile)
-                return $profile->get("first_name");
+            return $profile->get("first_name");
         }
 
         return null;

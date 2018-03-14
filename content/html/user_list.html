@@ -4,7 +4,7 @@
             <td>{$v->get("username")}</td>
             <td>{if $v->getProfile()}
                 {assign var="profile" value=$v->getProfile()}
-                <a href="{$profile->url()}">Profil</a> | 
+                <a href="{$profile->url()}">Profil</a> |
                 <a href="chat?user={$v->get("id")}">Start chat</a>
             {/if}</td></tr>
     {/foreach}

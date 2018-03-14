@@ -14,7 +14,8 @@ connection = mysql.createConnection({
     host: "localhost",
     user: "usn",
     database: "usn",
-    password: "yuRoKXc2bufyfCBy"
+    password: "yuRoKXc2bufyfCBy",
+    multipleStatements:true
 });
 
 Chat = require("./chat");
@@ -27,74 +28,69 @@ connection.connect(function(err) {
 
     if(err) throw err;
 
-    Chat.static.findHandle(1, 2, function() {
-
-    });
-
     io.on('connection', function(socket){
         var session;
         var handle;
-        console.log('a user connected');
+
+        console.log('* A user connected from', socket.request.connection.remoteAddress);
 
         memcached.get("usn:php:user", function(err, data) {
             if(err) {
                 console.log(err);
             } else {
                 user_data = JSON.parse(data);
-                console.log(user_data);
             }
         });
 
-        socket.on("request-session", function(data) {
-            session = Chat.static.getSession(data.user_id);
-            if(Chat.static.validateUser(data.session)) {
-                if(!session) {
-                    Chat.static.createSession(data.user_id, socket);
+        socket.on("register-session", function(user_id) {
+            console.log("* Registering session for user", user_id, "socket id:", socket.id);
+            session = Chat.static.createSession(user_id, socket);
+        })
+
+        socket.on("request-handle-list", function(data) {
+            Chat.static.getAllUserHandles(data.user_id, function(result) {
+                console.log("* Serving chat handles...");
+                socket.emit("receive-chat-handles", result);
+
+                for(var i in result) {
+                    var h = new Chat.handle(result[i]);
+                    h.getMessages((result) => {
+                        for(var j in result) {
+                            socket.emit("receive-message-buffer", { message: result[j], handle:result[j].chat_handle} );
+                        }
+                    });
+                }
+            });
+        });
+
+        socket.on("send-message", function(data) {
+            var handle = data.handle;
+            var message = new Chat.message(data.message);
+            var partner_id = data.partner_id;
+
+            message.save(() => {
+                var partner_socket = Chat.static.getUserSocket(partner_id);
+
+                var response = {
+                    message: message.attributes,
+                    handle: handle.id
                 }
 
-                session.socket = socket;
+                console.log("* Delivering messages...");
 
-                console.log("session request received, data:", data);
+                if(partner_socket) {
+                    partner_socket.emit("receive-message", response);
+                } else {
+                    console.log("+ Partner is not online, not able to deliver");
+                }
 
-                Chat.static.findHandle(user_data[data.session], data.partner, function(result) {
-                    var partner = Chat.static.getUserSocket(data.partner);
-                    var handle_data = data;
-                    //Chat.static.setSessionPartner(session, partner);
-
-                    console.log("Handle identified. Partner is: ", data.partner);
-                    handle = this;
-
-                    this.getMessages(messages => {
-                        socket.emit("receive-session", {handle: this.attributes, messages: messages});
-                    });
-
-                    socket.on("send-message", data => {
-                        var message = new Chat.message(data.message);
-                        this.addMessage(message, () => {
-                            Chat.static.getUserName(message.attributes.sender, function() {
-                                message.attributes.sender_name = this;
-                                socket.emit("receive-message", message.attributes);
-
-                                partner = Chat.static.getUserSocket(handle_data.partner);
-                                if(partner !== null) {
-                                    console.log("partner socket id:", partner.id);
-                                    partner.emit("receive-message", message.attributes);
-                                } else {
-                                    console.log("Partner not found. Partner id: ", handle_data.partner);
-                                }
-                            })
-                        });
-                    });
-                });
-            } else {
-                console.log("user is not valid");
-                console.log("user data:");
-                console.log(user_data);
-            }
+                this.emit("receive-message", response);
+            });
         });
 
         socket.on("disconnect", function() {
-
+            console.log("* User disconnected. Removing session for user", session.user_id);
+            delete Chat.sessions[session.user_id];
         });
     });
 });
