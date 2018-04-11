@@ -36,6 +36,12 @@ function redirect($url, $force = false) {
         header("location: " . $url);
 }
 
-function json($o) {
-    return json_encode($o);
+function arrGet($arr, $var, $return = null) {
+    if(isset($arr[$var])) {
+        return $arr[$var];
+    } elseif($return !== null) {
+        return null;
+    }
+
+    throw new Exception("Key not found in array");
 }
