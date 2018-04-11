@@ -1,9 +1,9 @@
 <?php
-
 /**
  * A parent class to represent an object that is saved to or loaded from the database
+ * @author Thomas Mundal<thmundal@gmail.com>
  */
-class db_object {
+abstract class db_object {
     public static $connection;
     protected static $table;
     protected $attributes = [];
@@ -24,7 +24,7 @@ class db_object {
         $object = new static();
         $object->state = db_object_state::EXISTING_OBJECT;
 
-        $query = static::$connection->prepare("SELECT * FROM " . static::$table . " WHERE id=? LIMIT 1");
+        $query = static::$connection->prepare("SELECT * FROM " . static::table() . " WHERE id=? LIMIT 1");
 
         if($query) {
             $query->bind_param("i", $id);
@@ -54,7 +54,7 @@ class db_object {
      * Get a list of all objects of this type saved in database
      */
     public static function GetList() {
-        $query = static::$connection->prepare("SELECT id FROM " . static::$table);
+        $query = static::$connection->prepare("SELECT id FROM " . static::table());
         $query->execute();
         $result = $query->get_result();
 
@@ -157,7 +157,7 @@ class db_object {
      * @return string Table name
      */
     public static function table() {
-        return static::$table;
+        return static::$connection->real_escape_string(static::$table);
     }
 
     /**
