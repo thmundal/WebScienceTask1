@@ -45,7 +45,7 @@ connection.connect(function(err) {
         socket.on("register-session", function(user_id) {
             console.log("* Registering session for user", user_id, "socket id:", socket.id);
             session = Chat.static.createSession(user_id, socket);
-        })
+        });
 
         socket.on("request-handle-list", function(data) {
             Chat.static.getAllUserHandles(data.user_id, function(result) {
@@ -61,6 +61,24 @@ connection.connect(function(err) {
                     });
                 }
             });
+        });
+
+        socket.on("request-user-profile", function(data) {
+            console.log("* Serving user profile for user", data.user_id);
+            var user_id = data.user_id;
+
+            Chat.static.getUserProfile(data.user_id, (result) => {
+                this.emit("receive-user-profile", result);
+            });
+        });
+
+        socket.on("create-handle", function(data) {
+            var a = data.a || 0;
+            var b = data.b || 0;
+            var g = data.g || 0;
+            Chat.static.createChatHandle(a, b, g, (handle) => {
+                this.emit("receive-chat-handles", [ handle.attributes ]);
+            })
         });
 
         socket.on("send-message", function(data) {
@@ -89,8 +107,10 @@ connection.connect(function(err) {
         });
 
         socket.on("disconnect", function() {
-            console.log("* User disconnected. Removing session for user", session.user_id);
-            delete Chat.sessions[session.user_id];
+            if(session) {
+                console.log("* User disconnected. Removing session for user", session.user_id);
+                delete Chat.sessions[session.user_id];
+            }
         });
     });
 });

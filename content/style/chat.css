@@ -24,7 +24,7 @@
     bottom:0;
     left:0;
     height:50px;
-    margin-bottom:50px;
+    /* margin-bottom:50px; */
     width:100%;
     background:#000;
     vertical-align: bottom;
@@ -45,6 +45,7 @@
     color:#000;
     background:#FFF;
     width:300px;
+    height:300px;
 }
 
 #chatBarWrapper .js-chat-view-container .chat-input {
