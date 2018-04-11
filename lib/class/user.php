@@ -18,7 +18,7 @@ Class User extends db_object {
     public static function Login($username, $password) {
         global $memcached;
 
-        $query = static::$connection->prepare("SELECT id,password FROM ".static::$connection->real_escape_string(static::$table)." WHERE username = ?");
+        $query = static::$connection->prepare("SELECT id,password FROM ".static::table()." WHERE username = ?");
         $query->bind_param("s", $username);
         $query->execute();
         $query->store_result();
@@ -47,6 +47,52 @@ Class User extends db_object {
     }
 
     /**
+     * Load user data based on username
+     * @param string $username Username of the user to find
+     */
+    public static function LoadByUsername($username) {
+        $query = static::$connection->prepare("SELECT id FROM ".static::$connection->real_escape_string(static::$table)." WHERE username=?");
+        $query->bind_param("s", $username);
+        $query->execute();
+        $query->store_result();
+        $query->bind_result($id);
+        $query->fetch();
+
+        if($id) {
+            return User::Load($id);
+        }
+
+        return false;
+    }
+
+    public static function Search($keyword) {
+        $sql = "SELECT user.id FROM " . static::$connection->real_escape_string(static::$table) . " as user
+        LEFT JOIN ". UserProfile::table() . " as profile ON user.id = profile.user
+        WHERE
+            user.username LIKE ? OR
+            profile.first_name LIKE ? OR
+            profile.last_name LIKE ?";
+
+        $query = static::$connection->prepare($sql);
+
+        $out = [];
+
+        $keyword = "%".$keyword."%";
+        if($query) {
+            $query->bind_param("sss", $keyword, $keyword, $keyword);
+            $query->execute();
+            $results = $query->get_result();
+
+            foreach($results as $row) {
+                $out[] = static::Load($row["id"]);
+            }
+        } else {
+            pre_print_r(static::$connection->error);
+        }
+        return $out;
+    }
+
+    /**
      * Check if a user is currently logged in using the client's session
      * @return boolean
      */
@@ -71,6 +117,38 @@ Class User extends db_object {
     }
 
     /**
+     * Generates a password reset token to be validated when user requests a password change or lost his password
+     * @return string Returns the generated token
+     */
+    public function createPasswordToken() {
+        $token = uniqid();
+        $this->set("pw_token", $token);
+        $this->save();
+
+        return $token;
+    }
+
+    /**
+     * Validates a password token to allow the creation of a new password for associated user
+     * @param  string $token The token to validate
+     * @return boolean       Returns user id on success, false otherwise
+     */
+    public static function validatePasswordToken($token) {
+        $query = static::$connection->prepare("SELECT id FROM ". static::$connection->real_escape_string(static::$table) ." WHERE pw_token=?");
+        $query->bind_param("s", $token);
+        $query->execute();
+        $query->store_result();
+        $query->bind_result($id);
+        $query->fetch();
+
+        if($query->num_rows > 0) {
+            return $id;
+        }
+
+        return false;
+    }
+
+    /**
      * Check if a user with the given username exists
      * @param string $username Username to check
      */
@@ -83,14 +161,28 @@ Class User extends db_object {
         return $query->num_rows > 0;
     }
 
+
+    /**
+     * Check if a user with the given ID exists
+     * @param string $id ID to check
+     */
+    public static function ExistsID($id) {
+        $query = static::$connection->prepare("SELECT id FROM ".static::$connection->real_escape_string(static::$table)." WHERE id = ?");
+        $query->bind_param("i", $id);
+        $query->execute();
+        $query->store_result();
+
+        return $query->num_rows > 0;
+    }
+
     /**
      * Save a user to the database
      * @param string $username Username
      * @param string $password User password
      */
-    public static function Register($username, $password) {
+    public static function Register($username, $password, $email) {
         $user = new static();
-        $user->set(["username" => $username, "password" => User::Encrypt($password)]);
+        $user->set(["username" => $username, "password" => User::Encrypt($password), "email" => $email]);
         return $user->save();
     }
 

@@ -37,7 +37,20 @@ $(function() {
     $(".js-user-search").on("keypress", function(e) {
         if(e.key == "Enter") {
             console.log("Enter pressed");
-            $(this).val("");
+
+            var search_form = $("<form>").attr({
+                action: "search",
+                method: "post"
+            }).append($("<input>").attr({
+                type:"hidden",
+                name:"keyword",
+                value:$(this).val()
+            }));
+
+            $("body").append(search_form);
+            search_form.trigger("submit");
+
+            //$(this).val("");
         }
     });
 
@@ -84,7 +97,7 @@ function queryParams() {
     var p = location.search.split("?")[1];
     var d = {};
 
-    if(typeof p != "undefined") {        
+    if(typeof p != "undefined") {
         var split = p.split("&");
 
         for(var i in split) {

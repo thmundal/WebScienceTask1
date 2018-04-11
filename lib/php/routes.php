@@ -36,16 +36,20 @@ switch(get_route($config["root_url"])) {
                 unset($users_list[$key]);
             }
         }
-        
+
         $template_content = template("content/html/user_list.html", ["list" => $users_list]);
     break;
 
     case "/chat":
-        $partner = User::Load($_GET["user"]);
-        $partner_profile = $partner->getProfile();
-        $chat_handle = ChatHandle::getByParticipants($user->get("id"), $partner->get("id"));
+        if(User::ExistsID($_GET["user"])) {
+            $partner = User::Load($_GET["user"]);
+            $partner_profile = $partner->getProfile();
+            $chat_handle = ChatHandle::getByParticipants($user->get("id"), $partner->get("id"));
 
-        $template_content = template("content/html/chat_layout.html", ["partner_profile" => $partner_profile, "chat_handle" => $chat_handle->get("id")]);
+            $template_content = template("content/html/chat_layout.html", ["partner_profile" => $partner_profile, "chat_handle" => $chat_handle->get("id")]);
+        } else {
+            $template_content = "No user with that ID";
+        }
     break;
 
     case "/profile":
@@ -97,5 +101,11 @@ switch(get_route($config["root_url"])) {
                 redirect("create-profile");
             }
         }
+    break;
+
+    case "/search":
+        $users = User::search(arrGet($_POST, "keyword"));
+
+        $template_content = template("content/html/search_results.html", ["results" => $users]);
     break;
 }
